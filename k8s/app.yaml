@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: colorinspo
+  namespace: githubactions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: colorinspo
+  template:
+    metadata:
+      labels:
+        name: colorinspo
+    spec:
+      containers:
+        - name: colorinspo
+          image: "179901290133.dkr.ecr.us-west-2.amazonaws.com/colorinspo:IMAGE_TAG_PLACEHOLDER"
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: colorinspo
+  namespace: githubactions
+spec:
+  selector:
+    name: colorinspo
+  ports:
+    - port: 8080
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: colorinspo
+  namespace: githubactions
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: colorinspo
+                port:
+                  number: 8080
